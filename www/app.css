@@ -111,3 +111,7 @@
 .intro-logo i{font-style:normal;color:#5FD3B6}
 .intro.mkt .intro-sub{color:#B9E9DD}
 @media (prefers-reduced-motion:reduce){.node.next .bub,.node .start-tip{animation:none}.intro-chart path{animation:none;stroke-dashoffset:0}.intro-chart .area{animation:none;opacity:1}}
+.case-tag{align-self:flex-start;font-size:.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:var(--kin-soft);color:var(--kin);letter-spacing:.04em}
+.lesson-box{background:var(--kin-soft);border-radius:16px;padding:14px 16px;font-size:.95rem;line-height:1.7;display:flex;flex-direction:column;gap:4px}
+.lesson-box b{font-size:.75rem;letter-spacing:.06em;color:var(--kin)}
+#tMode{margin-bottom:-6px}

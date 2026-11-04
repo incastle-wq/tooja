@@ -113,7 +113,7 @@ function head(title,it){const q=it.q,c=q.u.c;return `<div class="q-head"><h2>${t
 function termOpts(q){const same=shuffle(GQ.filter(x=>x!==q&&x.cat===q.cat)),other=shuffle(GQ.filter(x=>x!==q&&x.cat!==q.cat));return shuffle([q.term].concat(same.concat(other).slice(0,3).map(x=>x.term)))}
 function renderQ(){const it=L.qs[L.i],q=it.q;L.state='ask';L.sel=null;L.tok++;L.hint=false;setBar();lFoot.className='l-foot';let h='';
   if(q.k==='mc'){if(!it.ord)it.ord=q.ox?q.o.map((_,i)=>i).sort((a,b)=>q.o[a].startsWith('O')?-1:1):shuffle(q.o.map((_,i)=>i));
-    h=head(q.ox?'O / X':'고르세요',it)+`<p class="q-text">${esc(q.q)}</p><div class="opts ${q.ox?'ox':''}">${it.ord.map((oi,i)=>`<button class="btn opt" data-opt="${i}"><span class="n">${i+1}</span><span class="c"><span>${esc(q.o[oi])}</span></span></button>`).join('')}</div>`;}
+    h=head(q.ox?'O / X':q.case?'실제 사례':'고르세요',it)+`<p class="q-text">${esc(q.q)}</p><div class="opts ${q.ox?'ox':''}">${it.ord.map((oi,i)=>`<button class="btn opt" data-opt="${i}"><span class="n">${i+1}</span><span class="c"><span>${esc(q.o[oi])}</span></span></button>`).join('')}</div>`;}
   else if(q.k==='term'){if(!it.opts)it.opts=termOpts(q);h=head('어떤 용어일까요?',it)+`<p class="q-text">${esc(q.def)}</p>${q.ex?`<p class="need">뉴스 예문: ${esc(q.ex.replace(q.term,'○○'))}</p>`:''}<div class="opts">${it.opts.map((o,i)=>`<button class="btn opt" data-opt="${i}"><span class="n">${i+1}</span><span class="c"><span>${esc(o)}</span></span></button>`).join('')}</div>`;}
   else if(q.k==='calc'){h=head('계산 문제',it)+`<p class="q-text">${esc(q.q)}</p><div class="ans-in"><input id="ansIn" inputmode="decimal" autocomplete="off" placeholder="답 입력" aria-label="답"><span class="u">${esc(q.unit)}</span></div><p class="need">${q.dp===0?'정수로':`소수 ${q.dp}자리까지`} 입력하면 돼요. 쉼표는 써도, 안 써도 괜찮아요. 작은 반올림 차이는 정답으로 쳐요.</p>${q.f?`<button class="hint-btn" id="hintBtn">공식 힌트 보기</button><div class="formula" id="hintBox" hidden>${esc(q.f)}</div>`:''}`;}
   qv.innerHTML=h;$('#lBody').scrollTop=0;if(!RM){qv.classList.remove('q-in');void qv.offsetWidth;qv.classList.add('q-in');}
@@ -207,7 +207,7 @@ function openViewer(uid,i){V.u=UM[uid];V.i=i||0;$('#viewer').hidden=false;docume
 function closeViewer(){$('#viewer').hidden=true;document.body.style.overflow='';}
 function renderViewer(){const u=V.u,cd=u.cards[V.i],last=V.i===u.cards.length-1;
   $('#vTitle').textContent=`${u.ui+1}. ${u.t}`;$('#vDots').innerHTML=u.cards.map((_,k)=>`<i class="${k===V.i?'on':''}"></i>`).join('');
-  $('#vIn').innerHTML=`<p class="need" style="font-weight:700;color:var(--g-${u.c.g})">${esc(u.c.name)} · 개념 ${V.i+1}/${u.cards.length}</p><h2>${esc(cd.h)}</h2><p class="p">${cd.p}</p>${cd.f?`<div class="formula">${esc(cd.f)}</div>`:''}${cd.calc?calcHtml(cd.calc):''}`;
+  $('#vIn').innerHTML=`<p class="need" style="font-weight:700;color:var(--g-${u.c.g})">${esc(u.c.name)} · 개념 ${V.i+1}/${u.cards.length}</p>${cd.case?'<span class="case-tag">실제 사례</span>':''}<h2>${esc(cd.h)}</h2><p class="p">${cd.p}</p>${cd.f?(cd.case?`<div class="lesson-box"><b>여기서 배울 점</b>${esc(cd.f)}</div>`:`<div class="formula">${esc(cd.f)}</div>`):''}${cd.calc?calcHtml(cd.calc):''}`;
   if(cd.calc)bindCalc($('#vIn'),cd.calc);
   if(!RM){const v=$('#vIn');v.classList.remove('v-anim');void v.offsetWidth;v.classList.add('v-anim');}
   $('#vBody').scrollTop=0;
@@ -219,17 +219,20 @@ $('#viewer').addEventListener('click',e=>{const t=e.target;
   const s=t.closest('[data-ustart]');if(s){closeViewer();return start('unit',s.dataset.ustart)}});
 
 /* ---------- 용어 탭 ---------- */
-const T={q:'',cat:''};
+const T={q:'',cat:'',mode:'terms'};
+const ALLCASES=CS.flatMap(c=>c.units.flatMap(u=>u.cards.filter(cd=>cd.case).map(cd=>({c,u,cd}))));
 function renderTerms(){const learned=GQ.filter(q=>isLearned(q.id)).length;
   $('#vTerms').innerHTML=`<header class="top"><div class="brand"><h1>경제 용어</h1><p>뉴스에 자주 나오는 말 ${GL.length}개</p></div><button class="icon-btn" data-open-set aria-label="설정">${ICON.gear}</button></header>
-  <button class="btn primary go-main" data-tquiz="1"><span class="t">용어 퀴즈 · 익힌 용어 ${learned}/${GL.length}</span><span class="u">설명 보고 용어 맞히기</span><span class="s">한 판에 ${S.set.len}문제 · 틀린 용어는 복습에 다시 나와요</span></button>
+  <div class="seg" id="tMode"><button data-tm="terms" aria-pressed="${T.mode==='terms'}">용어 사전 ${GL.length}</button><button data-tm="cases" aria-pressed="${T.mode==='cases'}">실제 사례 ${ALLCASES.length}</button></div>
+  ${T.mode==='cases'?casesHtml():`<button class="btn primary go-main" data-tquiz="1"><span class="t">용어 퀴즈 · 익힌 용어 ${learned}/${GL.length}</span><span class="u">설명 보고 용어 맞히기</span><span class="s">한 판에 ${S.set.len}문제 · 틀린 용어는 복습에 다시 나와요</span></button>
   <input class="search" id="tSearch" type="search" placeholder="용어나 뜻으로 검색 (예: 금리, 공매도)" value="${esc(T.q)}" aria-label="용어 검색">
   <div class="chips" id="tCats"><button data-tc="" aria-pressed="${!T.cat}">전체</button>${GCATS.map(c=>`<button data-tc="${esc(c)}" aria-pressed="${T.cat===c}">${esc(c)}</button>`).join('')}</div>
-  <div class="terms" id="tList"></div>`;renderTermList();}
+  <div class="terms" id="tList"></div>`}`;if(T.mode==='terms')renderTermList();}
+function casesHtml(){return CS.map(c=>{const list=ALLCASES.filter(x=>x.c===c);return list.length?`<section class="group"><h2><i style="background:var(--g-${c.g})"></i>${esc(c.name)}<span>${list.length}건</span></h2><div class="terms">${list.map(x=>`<details class="term"><summary><b>${esc(x.cd.h)}</b><span class="cat">${esc(x.u.t)}</span></summary><div class="td"><span>${x.cd.p}</span><span class="ex">${esc(x.cd.f||'')}</span><button class="hint-btn" data-goto="${x.u.id}|${x.u.cards.indexOf(x.cd)}">이 단원 개념 카드로 가기 →</button></div></details>`).join('')}</div></section>`:''}).join('')}
 function renderTermList(){const q=T.q.trim().toLowerCase();const list=GL.filter(g=>(!T.cat||g[1]===T.cat)&&(!q||(g[0]+g[2]).toLowerCase().includes(q)));
   $('#tList').innerHTML=list.length?list.map(g=>`<details class="term"><summary><b>${esc(g[0])}</b>${isLearned('g:'+g[0])?'<span class="cat" style="background:var(--matcha-soft);color:var(--matcha)">익힘</span>':''}<span class="cat">${esc(g[1])}</span></summary><div class="td"><span>${esc(g[2])}</span>${g[3]?`<span class="ex">${esc(g[3])}</span>`:''}</div></details>`).join(''):'<p class="note">찾는 용어가 없어요.</p>';}
 $('#vTerms').addEventListener('input',e=>{if(e.target.id==='tSearch'){T.q=e.target.value;renderTermList()}});
-$('#vTerms').addEventListener('click',e=>{const t=e.target;const c=t.closest('[data-tc]');if(c){T.cat=c.dataset.tc;$('#tCats').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===c));renderTermList();return}
+$('#vTerms').addEventListener('click',e=>{const t=e.target;const tm=t.closest('[data-tm]');if(tm){T.mode=tm.dataset.tm;renderTerms();return}const gt=t.closest('[data-goto]');if(gt){const [u,i]=gt.dataset.goto.split('|');openViewer(u,+i);return}const c=t.closest('[data-tc]');if(c){T.cat=c.dataset.tc;$('#tCats').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===c));renderTermList();return}
   if(t.closest('[data-tquiz]'))start('terms');});
 
 /* ---------- 계산기 탭 ---------- */
@@ -276,7 +279,7 @@ function runIntro(done){const el=$('#intro');if(S.set.intro===false){el.remove()
   $('#introM').innerHTML=mascot('cheer',96);$('#introM').style.animationDelay='1.2s';$('#introLogo').style.animationDelay='1.4s';$('#introSub').style.animationDelay='1.7s';setTimeout(close,RM?900:3300);}
 const ONB={i:0,goal:50,c:'iv'};
 function renderOnb(){const o=$('#onbIn');const dots=`<div class="onb-dots">${[0,1,2].map(k=>`<i class="${k===ONB.i?'on':''}"></i>`).join('')}</div>`;
-  if(ONB.i===0)o.innerHTML=`${mascot('happy',120)}<h2 style="font-family:var(--kr)">반가워요!<br>공부하는 부엉이, 올리예요</h2><p class="lead">시험 대비와 실전 투자, 둘 다 챙길 수 있게 만들었어요.</p><ul><li><b>投</b><span><strong>투자론</strong> 강의 목차 1~8장 + CAPM, 계산 문제와 모의고사</span></li><li><b>表</b><span><strong>재무제표</strong> 읽는 법부터 PER·DCF 가치평가까지</span></li><li><b>經</b><span>금리·환율·물가 같은 <strong>거시·미시 경제</strong></span></li><li><b>新</b><span><strong>경제뉴스 용어</strong> ${GL.length}개와 실전 투자 상식</span></li></ul>${dots}<button class="btn primary onb-go" data-onb="next">다음</button>`;
+  if(ONB.i===0)o.innerHTML=`${mascot('happy',120)}<h2 style="font-family:var(--kr)">반가워요!<br>공부하는 부엉이, 올리예요</h2><p class="lead">시험 대비와 실전 투자, 둘 다 챙길 수 있게 만들었어요.</p><ul><li><b>投</b><span><strong>투자론</strong> 강의 목차 1~8장 + CAPM, 계산 문제와 모의고사</span></li><li><b>表</b><span><strong>재무제표</strong> 읽는 법부터 PER·DCF 가치평가까지</span></li><li><b>經</b><span>금리·환율·물가 같은 <strong>거시·미시 경제</strong></span></li><li><b>新</b><span><strong>경제뉴스 용어</strong> ${GL.length}개와 실전 투자 상식</span></li><li><b>史</b><span>LTCM·SVB·레고랜드 같은 <strong>실제 사례 ${ALLCASES.length}건</strong>으로 개념 연결</span></li></ul>${dots}<button class="btn primary onb-go" data-onb="next">다음</button>`;
   else if(ONB.i===1)o.innerHTML=`${mascot('idle',100)}<h2 style="font-family:var(--kr)">하루에 얼마나 할까요?</h2><p class="lead">설정에서 언제든 바꿀 수 있어요.</p><div class="onb-pick">${[[30,'가볍게','하루 5분 정도'],[50,'꾸준히','하루 10분 정도'],[100,'시험 기간','하루 20분 정도']].map(([v,a,b])=>`<button class="btn" data-goal="${v}" aria-pressed="${ONB.goal===v}"><b>${a} · ${v} XP</b><span>${b}</span></button>`).join('')}</div>${dots}<button class="btn primary onb-go" data-onb="next">다음</button>`;
   else o.innerHTML=`${mascot('cheer',100)}<h2 style="font-family:var(--kr)">어디서 시작할까요?</h2><p class="lead">다른 코스도 언제든 바꿀 수 있어요.</p><div class="onb-pick">${CS.map(x=>`<button class="btn" data-oc="${x.id}" aria-pressed="${ONB.c===x.id}"><b>${esc(x.name)}</b><span>${esc(x.d)}</span></button>`).join('')}</div>${dots}<button class="btn primary onb-go" data-onb="done">공부 시작!</button>`;}
 function showOnb(){if(S.ui.onboarded)return;if(Object.keys(S.q).length){S.ui.onboarded=true;save();return}$('#onb').hidden=false;renderOnb();}

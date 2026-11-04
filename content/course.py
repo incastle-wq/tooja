@@ -614,6 +614,16 @@ GLOSS = [
  ['72의 법칙','투자원칙','72 ÷ 수익률 ≈ 원금이 두 배 되는 기간.',''],
 ]
 
+# ---- 실제 사례 붙이기
+import sys as _sys
+_sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from cases import CASES
+for _c in [IV, FS, MA, NW]:
+    for _u in _c:
+        for (_t, _p, _k, _q) in CASES.get(_u['id'], []):
+            _u['cards'].append({'h': _t, 'p': _p, 'f': _k, 'case': 1})
+            _u['q'].append(_q)
+
 CALCS = [
  ['미래가치·현재가치', 'iv', C_FV], ['현재가치(할인)', 'iv', C_PV], ['연금·영구연금', 'iv', C_ANN], ['WACC', 'iv', C_WACC], ['CAPM', 'iv', C_CAPM],
  ['두 자산 포트폴리오', 'iv', C_PORT], ['샤프비율·효용·최적비중', 'iv', C_SHARPE], ['고든 성장모형', 'iv', C_GORDON], ['채권 가격·듀레이션', 'iv', C_BOND],
@@ -631,4 +641,4 @@ here = os.path.dirname(os.path.abspath(__file__))
 n = sum(len(u['q']) for c in COURSES for u in c['units'])
 with open(os.path.join(here, '..', 'www', 'course.js'), 'w', encoding='utf-8') as f:
     f.write('// 자동 생성: content/course.py 를 고친 뒤 python3 content/course.py\nwindow.COURSES=' + json.dumps(COURSES, ensure_ascii=False) + ';\nwindow.GLOSS=' + json.dumps(GLOSS, ensure_ascii=False) + ';\nwindow.CALCS=' + json.dumps(CALCS, ensure_ascii=False) + ';\n')
-print('units', sum(len(c['units']) for c in COURSES), 'questions', n, 'calc', sum(1 for c in COURSES for u in c['units'] for q in u['q'] if q['k']=='calc'), 'terms', len(GLOSS), 'calculators', len(CALCS))
+print('cases', sum(len(v) for v in CASES.values()), 'units', sum(len(c['units']) for c in COURSES), 'questions', n, 'calc', sum(1 for c in COURSES for u in c['units'] for q in u['q'] if q['k']=='calc'), 'terms', len(GLOSS), 'calculators', len(CALCS))
