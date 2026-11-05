@@ -456,22 +456,34 @@ IMP_NW={
  'nw7':['규칙(리밸런싱·분할매수)을 미리 정해 두면 감정 매매를 줄일 수 있어요.','큰 손실을 피하는 것이 복리의 핵심이에요.']}
 for _u in IV: _u['lv']=LV_IV[_u['id']]; _u['imp']=IMP_IV[_u['id']]
 for _u in NW: _u['lv']=LV_NW[_u['id']]; _u['imp']=IMP_NW[_u['id']]
+from deep_iv import IVX as _IVX
+from deep_nw import NWX as _NWX
+_all={u['id']:u for u in IV+_IVX+NW+_NWX}
+IV=[_all[k] for k in ['iv1','iv2','iv10','iv3','iv4','iv11','iv12','iv6','iv7','iv5','iv13','iv14','iv15','iv8','iv9','iv16','iv17','iv18']]
+NW=[_all[k] for k in ['nw1','nw2','nw4','nw8','nw3','nw5','nw6','nw7','nw9','nw10','nw13','nw14','nw11','nw12']]
 for _c in [IV, FS, MA, NW]:
     for _u in _c:
         if _u.get('imp'): _u['cards'].append({'h':'투자 시사점','p':'이 단원 내용을 실전에 옮길 때 기억할 점이에요.','imp':_u.pop('imp')})
 
+C_PERF = {'in': [['rp', '포트폴리오 수익률(%)', 12], ['rf', '무위험이자율(%)', 3], ['sd', '표준편차(%)', 18], ['b', '베타', 1.2], ['rm', '시장수익률(%)', 10], ['rb', '벤치마크 수익률(%)', 9], ['te', '추적오차(%)', 4]], 'out': [['샤프비율', '(rp-rf)/sd', '', 3], ['트레이너 비율', '(rp-rf)/b', '%', 2], ['젠센 알파', 'rp-(rf+b*(rm-rf))', '%p', 2], ['정보비율', '(rp-rb)/te', '', 3]]}
+C_BS = {'in': [['s', '주가', 100], ['k', '행사가', 100], ['r', '무위험이자율(%)', 5], ['t', '만기(년)', 1], ['v', '변동성(%)', 20]], 'out': [['콜 가격', '(()=>{const N=x=>{const a=Math.abs(x)/Math.SQRT2,t=1/(1+0.3275911*a),y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-a*a);return 0.5*(1+(x<0?-y:y))};const sg=v/100*Math.sqrt(t),d1=(Math.log(s/k)+(r/100+Math.pow(v/100,2)/2)*t)/sg;return s*N(d1)-k*Math.exp(-r/100*t)*N(d1-sg)})()', '', 2], ['풋 가격(패리티)', '(()=>{const N=x=>{const a=Math.abs(x)/Math.SQRT2,t=1/(1+0.3275911*a),y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-a*a);return 0.5*(1+(x<0?-y:y))};const sg=v/100*Math.sqrt(t),d1=(Math.log(s/k)+(r/100+Math.pow(v/100,2)/2)*t)/sg;return s*N(d1)-k*Math.exp(-r/100*t)*N(d1-sg)-s+k*Math.exp(-r/100*t)})()', '', 2]]}
+C_KELLY = {'in': [['p', '승률(%)', 55], ['b', '이길 때 배당(배)', 1], ['acct', '계좌(만 원)', 10000], ['risk', '1회 허용 손실(%)', 1], ['stop', '손절폭(%)', 10]], 'out': [['켈리 비율', '(p/100-(1-p/100)/b)*100', '%', 1], ['하프 켈리', '(p/100-(1-p/100)/b)*50', '%', 1], ['1% 규칙 포지션', 'acct*risk/stop', '만 원', 0]]}
+C_FWD = {'in': [['s1', '1년 현물금리(%)', 3], ['s2', '2년 현물금리(%)', 4], ['d', '맥컬리 듀레이션(년)', 7], ['y', '만기수익률(%)', 5], ['dy', '금리 변화(%p)', 1]], 'out': [['1년 후 1년 선도금리', '(Math.pow(1+s2/100,2)/(1+s1/100)-1)*100', '%', 2], ['수정 듀레이션', 'd/(1+y/100)', '년', 2], ['가격 변화(근사)', '-d/(1+y/100)*dy', '%', 2]]}
+C_CAGR = {'in': [['a', '처음 금액', 100], ['b', '마지막 금액', 200], ['n', '기간(년)', 10], ['sd', '연 변동성(%)', 20], ['am', '산술평균 수익률(%)', 10]], 'out': [['CAGR', '(Math.pow(b/a,1/n)-1)*100', '%', 2], ['기하평균 근사(산술 − σ²/2)', 'am-Math.pow(sd,2)/200', '%', 2]]}
+C_VAR = {'in': [['v', '포지션(만 원)', 100000], ['sd', '일간 변동성(%)', 2], ['n', '보유 기간(일)', 1]], 'out': [['VaR 95%', '1.645*sd/100*v*Math.sqrt(n)', '만 원', 0], ['VaR 99%', '2.326*sd/100*v*Math.sqrt(n)', '만 원', 0]]}
+
 CALCS = [
  ['미래가치·현재가치', 'iv', C_FV], ['현재가치(할인)', 'iv', C_PV], ['연금·영구연금', 'iv', C_ANN], ['WACC', 'iv', C_WACC], ['CAPM', 'iv', C_CAPM],
  ['두 자산 포트폴리오', 'iv', C_PORT], ['샤프비율·효용·최적비중', 'iv', C_SHARPE], ['고든 성장모형', 'iv', C_GORDON], ['채권 가격·듀레이션', 'iv', C_BOND],
- ['옵션 만기손익', 'iv', C_OPT], ['풋–콜 패리티', 'iv', C_PCP], ['PER·PBR·PEG', 'fs', C_VAL], ['듀퐁 ROE', 'fs', C_DUPONT], ['DCF 영구성장 가치', 'fs', C_DCF],
+ ['옵션 만기손익', 'iv', C_OPT], ['풋–콜 패리티', 'iv', C_PCP], ['PER·PBR·PEG', 'fs', C_VAL], ['듀퐁 ROE', 'fs', C_DUPONT], ['DCF 영구성장 가치', 'fs', C_DCF], ['CAGR·변동성 손실', 'iv', C_CAGR], ['VaR', 'iv', C_VAR], ['성과평가 지표', 'iv', C_PERF], ['블랙–숄즈 옵션', 'iv', C_BS], ['선도금리·듀레이션', 'iv', C_FWD], ['켈리·포지션 크기', 'iv', C_KELLY],
  ['실질금리', 'ma', C_REAL], ['이자율평가 선물환', 'ma', C_FX], ['해외투자 원화 수익률', 'ma', C_FXRET], ['정부지출 승수', 'ma', C_MULT],
  ['72의 법칙·손실 회복', 'nw', C_RULE], ['적립식 평균단가', 'nw', C_DCA]]
 
 COURSES = [
- dict(id='iv', name='투자론', g='iv', d='대학원 투자론 강의 목차(1~8장) + CAPM·효율적 시장. 시험 대비 계산 문제 포함', units=IV),
+ dict(id='iv', name='투자론', g='iv', d='수익률·위험 측정부터 포트폴리오, CAPM·팩터, 성과평가, 옵션 가격결정, 채권 기간구조, 실전 위험관리까지. 대학원 시험 계산 문제 포함', units=IV),
  dict(id='fs', name='재무제표', g='fs', d='재무제표 읽기부터 상대·절대가치 평가, 공시 함정까지', units=FS),
  dict(id='ma', name='거시·미시', g='ma', d='수요·공급, GDP, 물가, 금리, 환율, 무역, 재정', units=MA),
- dict(id='nw', name='뉴스·실전', g='nw', d='경제뉴스 용어, 거래 제도, 상품, 세금, 투자 원칙', units=NW),
+ dict(id='nw', name='뉴스·실전', g='nw', d='뉴스 숫자 읽기, 실적 시즌, 수급, M&A, 매크로 이벤트, 해외주식·연금, 사기 구별, 투자 원칙', units=NW),
 ]
 here = os.path.dirname(os.path.abspath(__file__))
 n = sum(len(u['q']) for c in COURSES for u in c['units'])
