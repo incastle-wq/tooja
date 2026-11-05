@@ -270,8 +270,9 @@ $('#sClose').onclick=closeSheet;
 $('#sheet').addEventListener('click',e=>{if(e.target.id==='sheet')return closeSheet();
   const sb=e.target.closest('.seg button');if(sb){const k=sb.parentElement.dataset.k;S.set[k]=+sb.dataset.v;save();syncSheet();return}
   const cb=e.target.closest('.chk button');if(cb){S.set[cb.dataset.k]=!S.set[cb.dataset.k];save();syncSheet();}});
-$('#bkCopy').onclick=()=>{const txt=JSON.stringify(S);$('#bk').value=txt;try{navigator.clipboard.writeText(txt).then(()=>toast('진도를 복사했어요'),()=>{$('#bk').select();toast('위 글을 직접 복사하세요')})}catch(e){$('#bk').select()}};
-$('#bkLoad').onclick=()=>{try{const x=JSON.parse($('#bk').value);if(!x||typeof x.q!=='object')throw 0;S=normS(x);save();syncSheet();toast('진도를 복원했어요')}catch(e){toast('복원할 수 없는 내용이에요')}};
+const APPID='tooja';
+$('#bkCopy').onclick=()=>{const txt=JSON.stringify({app:APPID,fmt:1,...S});$('#bk').value=txt;try{navigator.clipboard.writeText(txt).then(()=>toast('진도를 복사했어요'),()=>{$('#bk').select();toast('위 글을 직접 복사하세요')})}catch(e){$('#bk').select()}};
+$('#bkLoad').onclick=()=>{try{const x=JSON.parse($('#bk').value);if(!x||typeof x.q!=='object')throw 0;const ks=Object.keys(x.q);if(x.app?x.app!==APPID:!(ks.length&&ks.every(k=>QM[k])))throw 0;const {app,fmt,...st}=x;S=normS(st);save();syncSheet();toast('진도를 복원했어요')}catch(e){toast('복원할 수 없는 내용이에요')}};
 $('#reset').onclick=e=>{const b=e.currentTarget;if(b.dataset.arm!=='1'){b.dataset.arm='1';b.textContent='정말 지울까요? 한 번 더 누르세요';setTimeout(()=>{b.dataset.arm='';b.textContent='진도 초기화'},4000);return}
   S=normS({set:S.set,ui:{onboarded:true}});save();b.dataset.arm='';b.textContent='진도 초기화';toast('진도를 초기화했어요')};
 
