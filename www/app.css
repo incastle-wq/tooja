@@ -1,15 +1,15 @@
 /* 하루투자: 공식 · 계산기 · 용어사전 · 학습 경로 */
 :root{
   --ai:#0F766E;--ai-deep:#0B5B55;--ai-soft:#DDF2EE;--on-ai:#FFFFFF;
-  --g-iv:#0F766E;--g-iv-s:#DDF2EE;--g-fs:#2F6EA8;--g-fs-s:#E1ECF7;--g-ma:#B45309;--g-ma-s:#FCEBD7;--g-nw:#8B3FD1;--g-nw-s:#F1E5FB;
+  --g-iv:#0F766E;--g-iv-s:#DDF2EE;--g-pr:#C2410C;--g-pr-s:#FDE8DC;--g-fs:#2F6EA8;--g-fs-s:#E1ECF7;--g-ma:#B45309;--g-ma-s:#FCEBD7;--g-nw:#8B3FD1;--g-nw-s:#F1E5FB;
   --mono:ui-monospace,'SFMono-Regular','JetBrains Mono',Menlo,Consolas,'Roboto Mono',monospace;
   --pat:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='30'%3E%3Cpath d='M0 26 L10 20 L20 23 L30 12 L40 16 L50 6 L60 9' fill='none' stroke='%23ffffff' stroke-opacity='.14' stroke-width='1.6'/%3E%3C/svg%3E");
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ai:#5FD3B6;--ai-deep:#3FB89A;--ai-soft:#12302B;--on-ai:#052019;
-  --g-iv:#5FD3B6;--g-iv-s:#12302B;--g-fs:#7FB0E0;--g-fs-s:#1B2A3A;--g-ma:#F0A65E;--g-ma-s:#3A2614;--g-nw:#C99AF2;--g-nw-s:#2E1F3D;
+  --g-iv:#5FD3B6;--g-iv-s:#12302B;--g-pr:#F59E6B;--g-pr-s:#3A2216;--g-fs:#7FB0E0;--g-fs-s:#1B2A3A;--g-ma:#F0A65E;--g-ma-s:#3A2614;--g-nw:#C99AF2;--g-nw-s:#2E1F3D;
   --pat:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='30'%3E%3Cpath d='M0 26 L10 20 L20 23 L30 12 L40 16 L50 6 L60 9' fill='none' stroke='%23052019' stroke-opacity='.2' stroke-width='1.6'/%3E%3C/svg%3E")}}
 :root[data-theme="dark"]{--ai:#5FD3B6;--ai-deep:#3FB89A;--ai-soft:#12302B;--on-ai:#052019;
-  --g-iv:#5FD3B6;--g-iv-s:#12302B;--g-fs:#7FB0E0;--g-fs-s:#1B2A3A;--g-ma:#F0A65E;--g-ma-s:#3A2614;--g-nw:#C99AF2;--g-nw-s:#2E1F3D;
+  --g-iv:#5FD3B6;--g-iv-s:#12302B;--g-pr:#F59E6B;--g-pr-s:#3A2216;--g-fs:#7FB0E0;--g-fs-s:#1B2A3A;--g-ma:#F0A65E;--g-ma-s:#3A2614;--g-nw:#C99AF2;--g-nw-s:#2E1F3D;
   --pat:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='30'%3E%3Cpath d='M0 26 L10 20 L20 23 L30 12 L40 16 L50 6 L60 9' fill='none' stroke='%23052019' stroke-opacity='.2' stroke-width='1.6'/%3E%3C/svg%3E")}
 .hero{background-size:60px 30px,auto}
 .btn.primary{box-shadow:0 6px 18px rgba(15,118,110,.28)}
@@ -127,3 +127,4 @@
 .gfx svg{display:block;width:100%;height:auto;max-width:480px;margin:0 auto;font-family:inherit;overflow:visible}
 .gfx figcaption{font-size:.8rem;line-height:1.5;color:var(--muted);margin-top:8px;padding:8px 4px 0;border-top:1px dashed var(--line)}
 .term .gfx-wrap{margin:6px 0}
+.pre{font-size:.8rem;color:var(--muted);margin-top:4px}

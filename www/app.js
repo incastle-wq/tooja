@@ -18,7 +18,7 @@ const fmt=(n,dp)=>{if(!isFinite(n))return '계산 불가';return Number(n).toLoc
 
 /* ---------- 데이터 ---------- */
 const CS=window.COURSES||[],GL=window.GLOSS||[],CALCS=window.CALCS||[];const CM={},UM={},QM={},ALLQ=[];
-CS.forEach(c=>{CM[c.id]=c;c.units.forEach((u,ui)=>{u.c=c;u.ui=ui;UM[u.id]=u;u.q.forEach((q,i)=>{q.id=u.id+':'+i;q.u=u;QM[q.id]=q;ALLQ.push(q)})})});
+CS.forEach(c=>{CM[c.id]=c;c.units.forEach((u,ui)=>{u.c=c;u.ui=ui;UM[u.id]=u;u.q.forEach((q,i)=>{q.id=(u.src||u.id)+':'+i;q.u=u;const o=QM[q.id];if(!o)ALLQ.push(q);else if(o.u.src&&!u.src)ALLQ[ALLQ.indexOf(o)]=q;if(!o||(o.u.src&&!u.src))QM[q.id]=q})})});
 const LVN=['','입문','중급','고급','전문가'];
 const GCATS=[...new Set(GL.map(g=>g[1]))];
 const GQ=GL.map((g,i)=>({id:'g:'+g[0],k:'term',term:g[0],cat:g[1],def:g[2],ex:g[3],u:{t:'용어 퀴즈',c:{name:'용어',g:'nw'}}}));GQ.forEach(q=>QM[q.id]=q);
@@ -196,7 +196,7 @@ $('#vLearn').addEventListener('click',e=>{const t=e.target;
 
 /* ---------- 단원 시트 · 개념 카드 ---------- */
 function openUSheet(id){const u=UM[id],c=u.c,n=uLearned(u),dn=uDue(u,now());
-  $('#usheetIn').innerHTML=`<div class="u-head" style="--gc:var(--g-${c.g});--gs:var(--g-${c.g}-s)"><span class="c-ic" style="${u.ic.length>2?'font-size:.85rem':''}">${esc(u.ic)}</span><div><h2>${u.ui+1}. ${esc(u.t)}</h2><p><span class="lvb lv${u.lv||1}">${LVN[u.lv||1]}</span> ${esc(u.d)}</p></div></div><div class="meter"><span style="width:${n/u.q.length*100}%;background:var(--g-${c.g})"></span></div><p class="note">${n}/${u.q.length} 문제 익힘${dn?` · 복습할 문제 ${dn}개`:''} · 계산 문제 ${u.q.filter(q=>q.k==='calc').length}개</p>
+  $('#usheetIn').innerHTML=`<div class="u-head" style="--gc:var(--g-${c.g});--gs:var(--g-${c.g}-s)"><span class="c-ic" style="${u.ic.length>2?'font-size:.85rem':''}">${esc(u.ic)}</span><div><h2>${u.ui+1}. ${esc(u.t)}</h2><p><span class="lvb lv${u.lv||1}">${LVN[u.lv||1]}</span> ${esc(u.d)}</p>${u.pre?`<p class="pre">먼저 보면 좋아요 · ${esc(u.pre)}</p>`:''}</div></div><div class="meter"><span style="width:${n/u.q.length*100}%;background:var(--g-${c.g})"></span></div><p class="note">${n}/${u.q.length} 문제 익힘${dn?` · 복습할 문제 ${dn}개`:''} · 계산 문제 ${u.q.filter(q=>q.k==='calc').length}개</p>
   <div class="u-acts"><button class="btn" data-ucards="${u.id}">개념 카드 보기 <span>${u.cards.length}장 · 사례 ${u.cards.filter(c=>c.case).length}건 · 시사점</span></button><button class="btn primary" data-ustart="${u.id}">${n?'연습 이어서 하기':'연습 시작'} <span>문제 ${Math.min(S.set.len,u.q.length)}개</span></button><button class="btn" id="uClose">닫기</button></div>`;
   $('#usheet').hidden=false;}
 function closeUSheet(immediate){const sh=$('#usheet');if(sh.hidden)return;if(immediate||RM){sh.hidden=true;return}sh.classList.add('closing');setTimeout(()=>{sh.classList.remove('closing');sh.hidden=true},210)}
@@ -221,8 +221,8 @@ $('#viewer').addEventListener('click',e=>{const t=e.target;
 
 /* ---------- 용어 탭 ---------- */
 const T={q:'',cat:'',mode:'terms'};
-const gfx=(u,i)=>{const h=window.GFX?GFX.get(u.id+':'+i):'';return h?`<div class="gfx-wrap" style="--gx-a:var(--g-${u.c.g})">${h}</div>`:''};
-const ALLCASES=CS.flatMap(c=>c.units.flatMap(u=>u.cards.filter(cd=>cd.case).map(cd=>({c,u,cd}))));
+const gfx=(u,i)=>{const h=window.GFX?GFX.get((u.src||u.id)+':'+i):'';return h?`<div class="gfx-wrap" style="--gx-a:var(--g-${u.c.g})">${h}</div>`:''};
+const ALLCASES=CS.flatMap(c=>c.units.filter(u=>!u.src).flatMap(u=>u.cards.filter(cd=>cd.case).map(cd=>({c,u,cd}))));
 function renderTerms(){const learned=GQ.filter(q=>isLearned(q.id)).length;
   $('#vTerms').innerHTML=`<header class="top"><div class="brand"><h1>경제 용어</h1><p>뉴스에 자주 나오는 말 ${GL.length}개</p></div><button class="icon-btn" data-open-set aria-label="설정">${ICON.gear}</button></header>
   <div class="seg" id="tMode"><button data-tm="terms" aria-pressed="${T.mode==='terms'}">용어 사전 ${GL.length}</button><button data-tm="cases" aria-pressed="${T.mode==='cases'}">실제 사례 ${ALLCASES.length}</button></div>
@@ -280,7 +280,7 @@ $('#reset').onclick=e=>{const b=e.currentTarget;if(b.dataset.arm!=='1'){b.datase
 function runIntro(done){const el=$('#intro');if(S.set.intro===false){el.remove();return done()}
   let closed=false;const close=()=>{if(closed)return;closed=true;el.classList.add('out');setTimeout(()=>el.remove(),550);done()};el.addEventListener('click',close);
   $('#introM').innerHTML=mascot('cheer',96);$('#introM').style.animationDelay='1.2s';$('#introLogo').style.animationDelay='1.4s';$('#introSub').style.animationDelay='1.7s';setTimeout(close,RM?900:3300);}
-const ONB={i:0,goal:50,c:'iv'};
+const ONB={i:0,goal:50,c:'pr'};
 function renderOnb(){const o=$('#onbIn');const dots=`<div class="onb-dots">${[0,1,2].map(k=>`<i class="${k===ONB.i?'on':''}"></i>`).join('')}</div>`;
   if(ONB.i===0)o.innerHTML=`${mascot('happy',120)}<h2 style="font-family:var(--kr)">반가워요!<br>공부하는 부엉이, 올리예요</h2><p class="lead">시험 대비와 실전 투자, 둘 다 챙길 수 있게 만들었어요.</p><ul><li><b>投</b><span><strong>투자론</strong> 강의 목차 1~8장 + CAPM, 계산 문제와 모의고사</span></li><li><b>表</b><span><strong>재무제표</strong> 읽는 법부터 PER·DCF 가치평가까지</span></li><li><b>經</b><span>금리·환율·물가 같은 <strong>거시·미시 경제</strong></span></li><li><b>新</b><span><strong>경제뉴스 용어</strong> ${GL.length}개와 실전 투자 상식</span></li><li><b>史</b><span>LTCM·SVB·레고랜드 같은 <strong>실제 사례 ${ALLCASES.length}건</strong>으로 개념 연결</span></li></ul>${dots}<button class="btn primary onb-go" data-onb="next">다음</button>`;
   else if(ONB.i===1)o.innerHTML=`${mascot('idle',100)}<h2 style="font-family:var(--kr)">하루에 얼마나 할까요?</h2><p class="lead">설정에서 언제든 바꿀 수 있어요.</p><div class="onb-pick">${[[30,'가볍게','하루 5분 정도'],[50,'꾸준히','하루 10분 정도'],[100,'시험 기간','하루 20분 정도']].map(([v,a,b])=>`<button class="btn" data-goal="${v}" aria-pressed="${ONB.goal===v}"><b>${a} · ${v} XP</b><span>${b}</span></button>`).join('')}</div>${dots}<button class="btn primary onb-go" data-onb="next">다음</button>`;

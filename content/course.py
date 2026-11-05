@@ -459,7 +459,7 @@ for _u in NW: _u['lv']=LV_NW[_u['id']]; _u['imp']=IMP_NW[_u['id']]
 from deep_iv import IVX as _IVX
 from deep_nw import NWX as _NWX
 _all={u['id']:u for u in IV+_IVX+NW+_NWX}
-IV=[_all[k] for k in ['iv1','iv2','iv10','iv3','iv4','iv11','iv12','iv6','iv7','iv5','iv13','iv14','iv15','iv8','iv9','iv16','iv17','iv18']]
+IV=[_all[k] for k in ['iv1','iv2','iv10','iv4','iv11','iv5','iv3','iv12','iv6','iv7','iv13','iv14','iv15','iv8','iv9','iv16','iv17','iv18']]
 NW=[_all[k] for k in ['nw1','nw2','nw4','nw8','nw3','nw5','nw6','nw7','nw9','nw10','nw13','nw14','nw11','nw12']]
 for _c in [IV, FS, MA, NW]:
     for _u in _c:
@@ -491,6 +491,20 @@ for _c in COURSES:
         for _i, _q in enumerate(_u['q']):
             if not (_q.get('e') or '').strip() and EXPL.get(f"{_u['id']}:{_i}"):
                 _q['e'] = EXPL[f"{_u['id']}:{_i}"]
+import copy as _cp
+_ALLU={u['id']:u for c in COURSES for u in c['units']}
+_PR=['nw8','nw1','nw4','fs1','fs2','fs3','fs4','fs5','iv10','iv11','iv12','fs6','nw5','nw6','nw13','nw9','nw7','nw14']
+_PRU=[]
+for _k in _PR:
+    _x=_cp.deepcopy(_ALLU[_k]); _x['src']=_k; _x['id']='p_'+_k; _PRU.append(_x)
+COURSES.insert(0, dict(id='pr', name='실전 입문', g='pr', d='처음 투자하는 사람을 위한 18단원 경로: 뉴스 읽기 → 재무제표 기초 → 수익률·위험 → 상품·세금 → 원칙과 사기 구별. 다른 코스와 진도를 공유해요', units=_PRU))
+for _c in COURSES:
+    if _c['id']=='iv': _c['d']='전공·시험 경로. 수익률·위험 측정부터 포트폴리오, CAPM·팩터, 성과평가, 옵션 가격결정, 채권 기간구조, 실전 위험관리까지'
+_PRE={'iv3':'CAPM과 효율적 시장','iv5':'포트폴리오 이론','iv6':'시간가치와 자본비용','fs7':'상대가치 평가, 시간가치와 자본비용(투자론)','fs14':'DCF 가치평가','iv13':'CAPM과 효율적 시장','iv14':'CAPM과 효율적 시장','iv16':'파생상품','iv17':'채권','iv18':'위험의 여러 얼굴, 파생상품','ma4':'화폐·신용과 금융시스템','ma14':'환율, 금리와 통화정책','nw12':'거시 뉴스 용어'}
+for _c in COURSES:
+    for _u in _c['units']:
+        _k=_u.get('src',_u['id'])
+        if _k in _PRE and _c['id']!='pr': _u['pre']=_PRE[_k]
 here = os.path.dirname(os.path.abspath(__file__))
 n = sum(len(u['q']) for c in COURSES for u in c['units'])
 with open(os.path.join(here, '..', 'www', 'course.js'), 'w', encoding='utf-8') as f:
