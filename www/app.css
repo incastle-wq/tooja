@@ -122,3 +122,8 @@
 .imps li{background:var(--surface);border-radius:14px;padding:12px 14px 12px 40px;position:relative;box-shadow:var(--sh1);line-height:1.65;font-size:.95rem}
 .imps li::before{content:"→";position:absolute;left:14px;top:12px;color:var(--ai);font-weight:900}
 .imp-tag{background:var(--ai-soft);color:var(--ai)}
+.gfx-wrap{margin:14px 0 4px}
+.gfx{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 10px 10px;box-shadow:var(--sh1)}
+.gfx svg{display:block;width:100%;height:auto;max-width:480px;margin:0 auto;font-family:inherit;overflow:visible}
+.gfx figcaption{font-size:.8rem;line-height:1.5;color:var(--muted);margin-top:8px;padding:8px 4px 0;border-top:1px dashed var(--line)}
+.term .gfx-wrap{margin:6px 0}

@@ -208,7 +208,7 @@ function openViewer(uid,i){V.u=UM[uid];V.i=i||0;$('#viewer').hidden=false;docume
 function closeViewer(){$('#viewer').hidden=true;document.body.style.overflow='';}
 function renderViewer(){const u=V.u,cd=u.cards[V.i],last=V.i===u.cards.length-1;
   $('#vTitle').textContent=`${u.ui+1}. ${u.t}`;$('#vDots').innerHTML=u.cards.map((_,k)=>`<i class="${k===V.i?'on':''}"></i>`).join('');
-  $('#vIn').innerHTML=`<p class="need" style="font-weight:700;color:var(--g-${u.c.g})">${esc(u.c.name)} · 개념 ${V.i+1}/${u.cards.length}</p>${cd.case?'<span class="case-tag">실제 사례</span>':cd.imp?'<span class="case-tag imp-tag">투자 시사점</span>':''}<h2>${esc(cd.h)}</h2><p class="p">${cd.p}</p>${cd.f?(cd.case?`<div class="lesson-box"><b>여기서 배울 점</b>${esc(cd.f)}</div>`:`<div class="formula">${esc(cd.f)}</div>`):''}${cd.calc?calcHtml(cd.calc):''}${cd.imp?`<ul class="imps">${cd.imp.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}`;
+  $('#vIn').innerHTML=`<p class="need" style="font-weight:700;color:var(--g-${u.c.g})">${esc(u.c.name)} · 개념 ${V.i+1}/${u.cards.length}</p>${cd.case?'<span class="case-tag">실제 사례</span>':cd.imp?'<span class="case-tag imp-tag">투자 시사점</span>':''}<h2>${esc(cd.h)}</h2><p class="p">${cd.p}</p>${gfx(u,V.i)}${cd.f?(cd.case?`<div class="lesson-box"><b>여기서 배울 점</b>${esc(cd.f)}</div>`:`<div class="formula">${esc(cd.f)}</div>`):''}${cd.calc?calcHtml(cd.calc):''}${cd.imp?`<ul class="imps">${cd.imp.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}`;
   if(cd.calc)bindCalc($('#vIn'),cd.calc);
   if(!RM){const v=$('#vIn');v.classList.remove('v-anim');void v.offsetWidth;v.classList.add('v-anim');}
   $('#vBody').scrollTop=0;
@@ -221,6 +221,7 @@ $('#viewer').addEventListener('click',e=>{const t=e.target;
 
 /* ---------- 용어 탭 ---------- */
 const T={q:'',cat:'',mode:'terms'};
+const gfx=(u,i)=>{const h=window.GFX?GFX.get(u.id+':'+i):'';return h?`<div class="gfx-wrap" style="--gx-a:var(--g-${u.c.g})">${h}</div>`:''};
 const ALLCASES=CS.flatMap(c=>c.units.flatMap(u=>u.cards.filter(cd=>cd.case).map(cd=>({c,u,cd}))));
 function renderTerms(){const learned=GQ.filter(q=>isLearned(q.id)).length;
   $('#vTerms').innerHTML=`<header class="top"><div class="brand"><h1>경제 용어</h1><p>뉴스에 자주 나오는 말 ${GL.length}개</p></div><button class="icon-btn" data-open-set aria-label="설정">${ICON.gear}</button></header>
@@ -229,7 +230,7 @@ function renderTerms(){const learned=GQ.filter(q=>isLearned(q.id)).length;
   <input class="search" id="tSearch" type="search" placeholder="용어나 뜻으로 검색 (예: 금리, 공매도)" value="${esc(T.q)}" aria-label="용어 검색">
   <div class="chips" id="tCats"><button data-tc="" aria-pressed="${!T.cat}">전체</button>${GCATS.map(c=>`<button data-tc="${esc(c)}" aria-pressed="${T.cat===c}">${esc(c)}</button>`).join('')}</div>
   <div class="terms" id="tList"></div>`}`;if(T.mode==='terms')renderTermList();}
-function casesHtml(){return CS.map(c=>{const list=ALLCASES.filter(x=>x.c===c);return list.length?`<section class="group"><h2><i style="background:var(--g-${c.g})"></i>${esc(c.name)}<span>${list.length}건</span></h2><div class="terms">${list.map(x=>`<details class="term"><summary><b>${esc(x.cd.h)}</b><span class="cat">${esc(x.u.t)}</span></summary><div class="td"><span>${x.cd.p}</span><span class="ex">${esc(x.cd.f||'')}</span><button class="hint-btn" data-goto="${x.u.id}|${x.u.cards.indexOf(x.cd)}">이 단원 개념 카드로 가기 →</button></div></details>`).join('')}</div></section>`:''}).join('')}
+function casesHtml(){return CS.map(c=>{const list=ALLCASES.filter(x=>x.c===c);return list.length?`<section class="group"><h2><i style="background:var(--g-${c.g})"></i>${esc(c.name)}<span>${list.length}건</span></h2><div class="terms">${list.map(x=>`<details class="term"><summary><b>${esc(x.cd.h)}</b><span class="cat">${esc(x.u.t)}</span></summary><div class="td"><span>${x.cd.p}</span>${gfx(x.u,x.u.cards.indexOf(x.cd))}<span class="ex">${esc(x.cd.f||'')}</span><button class="hint-btn" data-goto="${x.u.id}|${x.u.cards.indexOf(x.cd)}">이 단원 개념 카드로 가기 →</button></div></details>`).join('')}</div></section>`:''}).join('')}
 function renderTermList(){const q=T.q.trim().toLowerCase();const list=GL.filter(g=>(!T.cat||g[1]===T.cat)&&(!q||(g[0]+g[2]).toLowerCase().includes(q)));
   $('#tList').innerHTML=list.length?list.map(g=>`<details class="term"><summary><b>${esc(g[0])}</b>${isLearned('g:'+g[0])?'<span class="cat" style="background:var(--matcha-soft);color:var(--matcha)">익힘</span>':''}<span class="cat">${esc(g[1])}</span></summary><div class="td"><span>${esc(g[2])}</span>${g[3]?`<span class="ex">${esc(g[3])}</span>`:''}</div></details>`).join(''):'<p class="note">찾는 용어가 없어요.</p>';}
 $('#vTerms').addEventListener('input',e=>{if(e.target.id==='tSearch'){T.q=e.target.value;renderTermList()}});
