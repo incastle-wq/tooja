@@ -485,6 +485,12 @@ COURSES = [
  dict(id='ma', name='거시·미시', g='ma', d='수요·공급, GDP, 물가, 금리, 환율, 무역, 재정', units=MA),
  dict(id='nw', name='뉴스·실전', g='nw', d='뉴스 숫자 읽기, 실적 시즌, 수급, M&A, 매크로 이벤트, 해외주식·연금, 사기 구별, 투자 원칙', units=NW),
 ]
+exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'expl.py'), encoding='utf-8').read())
+for _c in COURSES:
+    for _u in _c['units']:
+        for _i, _q in enumerate(_u['q']):
+            if not (_q.get('e') or '').strip() and EXPL.get(f"{_u['id']}:{_i}"):
+                _q['e'] = EXPL[f"{_u['id']}:{_i}"]
 here = os.path.dirname(os.path.abspath(__file__))
 n = sum(len(u['q']) for c in COURSES for u in c['units'])
 with open(os.path.join(here, '..', 'www', 'course.js'), 'w', encoding='utf-8') as f:
